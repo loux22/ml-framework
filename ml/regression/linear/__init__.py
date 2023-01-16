@@ -1,60 +1,53 @@
-from sklearn.datasets import make_regression
+# y = w * x + b 
+# y = valeur dépendante estimée.
+# b = constante ou biais (ordonnée à l'origine).
+# w = coefficient de régression ou pente (poids).
+# x = valeur de la variable indépendante. 
+
+# OBJECTIF : trouver l'ensemble optimal de paramètres qui minimise la fonction de perte -> la valeur optimale de la pente (m) et de la constante (b). 
+# gradient descent -> algorithme d'optimisation
+
 import numpy as np
-from matplotlib import pyplot as plt
-
-X, y = make_regression(n_samples=200, n_features=1, n_informative=1, noise=6, bias=30)
 
 
-class LinearRegression():
-    def __init__(self,X,m=200):
-        ''' constructor '''
+class LinearRegression() :
+    def __init__(self, epochs = 1000, learning_rate = 0.01) :
+        self.learning_rate = learning_rate
+        self.epochs = epochs
+
+    # fontion d'entrainement
+    def fit(self, X, Y) :
+        self.m, self.n = X.shape
+        # initialisation du poids
+        self.w = np.zeros(self.n)
+        self.b = 0
         self.X = X
-        self.m = m
-        
-    def h(self,w):
-        return (w[1]*np.array(self.X[:,0])+w[0])
-  
-    def cost(self, w, y):
-        return (.5/self.m) * np.sum(np.square(self.h(w)-np.array(y)))
+        self.y = Y
+        # apprentissage gradient descent 
+        for i in range(self.epochs) :
+            self.update_weights()
+        return self
 
-    def grad(self, w, y):
-        g = [0]*2
-        g[0] = (1/self.m) * np.sum(self.h(w)-np.array(y))
-        g[1] = (1/self.m) * np.sum((self.h(w)-np.array(y))*np.array(self.X[:,0]))
-        return g
-  
-    def descent(self, w_new, w_prev, lr):
-        j=0
-        while True:
-            w_prev = w_new
-            w0 = w_prev[0] - lr*self.grad(w_prev,y)[0]
-            w1 = w_prev[1] - lr*self.grad(w_prev,y)[1]
-            w_new = [w0, w1]
-            if (w_new[0]-w_prev[0])**2 + (w_new[1]-w_prev[1])**2 <= pow(10,-6):
-                return w_new
-            if j>500: 
-                return w_new
-            j+=1 
-          
-    def graph(self, formula, x_range):  
-        x = np.array(x_range)  
-        y = formula(x)  
-        plt.plot(x, y)
+    def predict(self, X) :
+        # y = w * x + b
+        return X.dot(self.w) + self.b
     
-    def my_formula(self, x):
-        w = [0,-1]
-        w = self.descent(w,w,.1)
-        return w[0]+w[1]*x
-        
-linear_reg = LinearRegression(X)
+    # calcul du score
+    def score(self, X_test, y_test):
+        sst = np.sum((X_test - X_test.mean())**2)
+        ssr = np.sum((y_test - X_test)**2)
+        r2 = 1-(sst/ssr)
+        return r2
+    
 
-plt.scatter(X,y, c = "red",alpha=.5, marker = 'o')
-plt.xlabel("X")
-plt.ylabel("Y")
-plt.show()
-
-plt.scatter(X,y, c = "red",alpha=.5, marker = 'o')
-linear_reg.graph(linear_reg.my_formula, range(-5,5))
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.show()
+    # fonction gradient descent -> En utilisant la descente de gradient, nous calculons de manière itérative les gradients de la fonction de perte par rapport aux paramètres 
+    # et continuons de mettre à jour les paramètres jusqu'à ce que nous atteignions le minimum. 
+    def update_weights(self) :
+        Y_pred = self.predict(self.X)
+        # calcul gradient
+        dW = - (2 * (self.X.T).dot(self.y - Y_pred) ) / self.m
+        db = - 2 * np.sum(self.y - Y_pred) / self.m
+        # mise à jours poids et biais
+        self.w = self.w - self.learning_rate * dW
+        self.b = self.b - self.learning_rate * db
+        return self

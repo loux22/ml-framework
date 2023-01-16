@@ -25,19 +25,44 @@ print('Accuracy : {}\nPercentage accuracy : {}%'.format(accuracy, round(accuracy
 
 # ========== LINEAR REGRESSION ==========
 from ml.regression.linear import LinearRegression
+df = pd.read_csv("data/salary_data.csv")
 
-X, y = make_regression(n_samples=200, n_features=1, n_informative=1, noise=6, bias=30)
-m = 200
+X = df[["YearsExperience"]].values
+y = df[["Salary"]].values
 
-linear_reg = LinearRegression(X)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
 
-plt.scatter(X,y, c = "red",alpha=.5, marker = 'o')
-plt.xlabel("X")
-plt.ylabel("Y")
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+print(model.score(X_test, y_test))
+
+Y_pred = model.predict(X_test)
+
+plt.scatter( X_test, y_test, color = 'blue' )
+plt.plot( X_test, Y_pred, color = 'orange' )
+plt.title( 'Salary vs Experience' )
+plt.xlabel( 'Years of Experience' )
+plt.ylabel( 'Salary' )
 plt.show()
 
-plt.scatter(X,y, c = "red",alpha=.5, marker = 'o')
-linear_reg.graph(linear_reg.my_formula, range(-5,5))
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.show()
+
+
+
+# from ml.regression.linear import LinearRegression
+
+# X, y = make_regression(n_samples=200, n_features=1, n_informative=1, noise=6, bias=30)
+# m = 200
+
+# linear_reg = LinearRegression(X)
+
+# plt.scatter(X,y, c = "red",alpha=.5, marker = 'o')
+# plt.xlabel("X")
+# plt.ylabel("Y")
+# plt.show()
+
+# plt.scatter(X,y, c = "red",alpha=.5, marker = 'o')
+# linear_reg.graph(linear_reg.my_formula, range(-5,5))
+# plt.xlabel('X')
+# plt.ylabel('Y')
+# plt.show()
